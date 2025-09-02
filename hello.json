@@ -1,0 +1,16 @@
+[
+  {
+    "id": "your-id",
+    "title": "Your Game",
+    "description": "One-liner pitch.",
+    "category": "Action",
+    "tags": ["platformer","pixel"],
+    "thumb": "https://your-cdn/thumb.jpg",
+    "embedUrl": "/games/your-game/index.html",
+    "rating": 4.6,
+    "plays": 12345,
+    "featured": true,
+    "new": true,
+    "trending": false
+  }
+]
