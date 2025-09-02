@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arcade Portal — Vanilla HTML/CSS/JS</title>
+  <style>
+    :root{
+      --bg:#0b0b0c;--bg-soft:#121214;--card:#16171a;--text:#f2f3f5;--muted:#a1a1aa;--brand:#6ee7ff;--accent:#8b5cf6;--ring:rgba(110,231,255,.35);
+      --shadow:0 10px 20px rgba(0,0,0,.25);
+    }
+    [data-theme="light"]{--bg:#f6f7f9;--bg-soft:#ffffff;--card:#ffffff;--text:#0b0b0c;--muted:#52525b;--brand:#0891b2;--accent:#7c3aed;--ring:rgba(15,118,110,.2);--shadow:0 10px 20px rgba(2,6,23,.08)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#0e0f12);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;position:sticky;top:0;background:linear-gradient(180deg,var(--bg),transparent);backdrop-filter:saturate(140%) blur(6px);padding:16px 0;z-index:5}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+    .logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--accent));box-shadow:var(--shadow)}
+    .actions{display:flex;gap:8px;align-items:center}
+    .search{flex:1;display:flex;align-items:center;gap:10px;background:var(--bg-soft);border:1px solid transparent;border-radius:14px;padding:10px 12px;box-shadow:var(--shadow)}
+    .search:focus-within{border-color:var(--ring)}
+    .search input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:14px}
+    .btn{border:1px solid rgba(255,255,255,.08);background:var(--bg-soft);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer}
+    .btn:hover{border-color:var(--ring)}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:var(--bg-soft);border:1px solid rgba(255,255,255,.08);cursor:pointer;white-space:nowrap}
+    .pill.active{outline:2px solid var(--ring)}
+    .row{display:flex;flex-wrap:wrap;gap:10px}
+
+    .tabs{display:flex;gap:8px;overflow:auto;padding-bottom:8px;margin-bottom:14px}
+
+    .grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:14px}
+    @media (min-width:600px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (min-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+    .card{position:relative;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow)}
+    .thumb{aspect-ratio:16/9;background:#0d0e12 url('') center/cover no-repeat}
+    .meta{padding:12px}
+    .title{font-weight:700;margin:0 0 4px}
+    .muted{color:var(--muted);font-size:13px}
+    .chip{font-size:12px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+    .card .row{justify-content:space-between}
+    .icon-btn{position:absolute;top:10px;right:10px;display:flex;gap:8px}
+    .icon{width:34px;height:34px;border-radius:10px;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:grid;place-items:center;border:1px solid rgba(255,255,255,.15);cursor:pointer}
+    .icon:hover{border-color:var(--ring)}
+
+    dialog{border:0;border-radius:16px;padding:0;background:var(--card);color:var(--text);max-width:min(1000px,96vw)}
+    .player{display:flex;flex-direction:column;min-width:min(1000px,96vw)}
+    .player header{position:sticky;top:0;padding:12px;background:var(--card);border-bottom:1px solid rgba(255,255,255,.08)}
+    .player iframe{width:100%;height:min(72vh,700px);border:0;background:#000}
+
+    .empty{padding:32px;border:1px dashed rgba(255,255,255,.12);border-radius:16px;text-align:center;color:var(--muted)}
+    .footer{margin-top:28px;color:var(--muted);font-size:13px}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:2px 6px;border-radius:6px}
+    input[type="file"]{display:none}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand"><div class="logo" aria-hidden="true"></div><div>Arcade Portal</div></div>
+      <div class="row" style="flex:1;align-items:center">
+        <label class="search" style="flex:1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="q" placeholder="Search games, tags, vibes" autocomplete="off" />
+        </label>
+        <button class="btn" id="themeBtn" title="Toggle theme">Theme</button>
+        <button class="btn" id="addBtn" title="Add game">Add</button>
+        <button class="btn" id="importBtn" title="Import catalog">Import</button>
+        <button class="btn" id="exportBtn" title="Export catalog">Export</button>
+        <input type="file" id="file" accept="application/json" />
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <section id="grid" class="grid" aria-live="polite"></section>
+
+    <p class="footer">Pro tip: press <span class="kbd">/</span> to focus search. Data persists in your browser via localStorage.</p>
+  </div>
+
+  <dialog id="modal">
+    <div class="player">
+      <header class="row" style="justify-content:space-between">
+        <div id="modalTitle" style="font-weight:700"></div>
+        <div class="row" style="gap:8px">
+          <button class="btn" id="openNew">Open in new tab</button>
+          <button class="btn" id="closeModal">Close</button>
+        </div>
+      </header>
+      <iframe id="frame" title="Game player" allowfullscreen></iframe>
+      <div style="padding:12px" class="muted" id="modalMeta"></div>
+    </div>
+  </dialog>
+
+  <dialog id="addDialog">
+    <form method="dialog" style="padding:18px 18px 10px 18px;min-width:min(520px,92vw)">
+      <h3 style="margin-top:0">Add Game</h3>
+      <div class="row" style="flex-wrap:wrap;gap:12px">
+        <input class="btn" style="flex:1" placeholder="Title" id="f-title" required />
+        <input class="btn" style="flex:1" placeholder="Category (e.g., Action)" id="f-cat" />
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:12px;margin-top:10px">
+        <input class="btn" style="flex:1" placeholder="Tags (comma-separated)" id="f-tags" />
+        <input class="btn" style="flex:1" placeholder="Thumbnail URL" id="f-thumb" />
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:12px;margin-top:10px">
+        <input class="btn" style="flex:1" placeholder="Embed URL (game index.html)" id="f-embed" required />
+        <input class="btn" style="width:120px" placeholder="Rating" id="f-rating" type="number" min="0" max="5" step="0.1" />
+      </div>
+      <textarea class="btn" id="f-desc" placeholder="Short description" style="width:100%;margin-top:10px;height:80px"></textarea>
+      <div class="row" style="justify-content:flex-end;gap:8px;margin-top:12px">
+        <button class="btn" value="cancel">Cancel</button>
+        <button class="btn" id="saveGame" value="default">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="card-tpl">
+    <article class="card">
+      <div class="thumb"></div>
+      <div class="icon-btn">
+        <div class="icon fav" title="Favorite">★</div>
+        <div class="icon hide" title="Hide">✕</div>
+      </div>
+      <div class="meta">
+        <h3 class="title"></h3>
+        <div class="row" style="align-items:center">
+          <span class="chip cat"></span>
+          <span class="muted" style="margin-left:auto"><span class="rating"></span> • <span class="plays"></span> plays</span>
+        </div>
+        <p class="muted desc" style="margin:8px 0 0"></p>
+        <div class="row" style="gap:6px;margin-top:10px;flex-wrap:wrap"></div>
+        <div class="row" style="margin-top:12px;gap:8px">
+          <button class="btn play">Play</button>
+          <button class="btn open">Open</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    // ---------- State & Utilities ----------
+    const LS = { FAV:"gp:favorites", HIDE:"gp:hidden", CAT:"gp:catalog", THEME:"gp:theme" };
+
+    const initialGames = [
+      { id:"neon-dash", title:"Neon Dash", description:"Twitchy runner. Survive, collect, flex PBs.", category:"Action", tags:["runner","fast","endless"], thumb:"https://picsum.photos/seed/neon/800/450", embedUrl:"games/neon-dash/index.html", rating:4.3, plays:120420, featured:true, new:true },
+      { id:"gridshift", title:"Gridshift+", description:"Sokoban meets match-3. Brain burn guaranteed.", category:"Puzzle", tags:["sokoban","logic","grid"], thumb:"https://picsum.photos/seed/grid/800/450", embedUrl:"games/gridshift/index.html", rating:4.7, plays:88420, featured:true },
+      { id:"pixel-peak", title:"Pixel Peak", description:"Precision platforming with crunchy SFX.", category:"Retro", tags:["platformer","8-bit","hard"], thumb:"https://picsum.photos/seed/pixel/800/450", embedUrl:"games/pixel-peak/index.html", rating:4.1, plays:54012, trending:true },
+      { id:"io-arena", title:".io Arena", description:"Tiny tank chaos in real-time lobbies.", category:".io", tags:["multiplayer","arena","tanks"], thumb:"https://picsum.photos/seed/arena/800/450", embedUrl:"games/io-arena/index.html", rating:4.5, plays:310004, trending:true },
+      { id:"lofi-clicker", title:"LoFi Clicker", description:"Idle, vibe, upgrade, repeat.", category:"Idle", tags:["idle","incremental","relax"], thumb:"https://picsum.photos/seed/clicker/800/450", embedUrl:"games/lofi-clicker/index.html", rating:4.0, plays:199999 }
+    ];
+
+    const CATS = ["All","Action","Puzzle","Retro",".io","Idle","Racing","Strategy","New","Trending","Featured","Favorites"];
+
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
+    const fmt = n => new Intl.NumberFormat().format(n);
+
+    const state = {
+      q:"",
+      cat:"All",
+      favorites: JSON.parse(localStorage.getItem(LS.FAV) || '[]'),
+      hidden: JSON.parse(localStorage.getItem(LS.HIDE) || '[]'),
+      catalog: JSON.parse(localStorage.getItem(LS.CAT) || JSON.stringify(initialGames)),
+      theme: localStorage.getItem(LS.THEME) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light')
+    };
+    document.documentElement.setAttribute('data-theme', state.theme);
+
+    const save = () => {
+      localStorage.setItem(LS.FAV, JSON.stringify(state.favorites));
+      localStorage.setItem(LS.HIDE, JSON.stringify(state.hidden));
+      localStorage.setItem(LS.CAT, JSON.stringify(state.catalog));
+      localStorage.setItem(LS.THEME, state.theme);
+    };
+
+    // ---------- Render Tabs ----------
+    function renderTabs(){
+      const tabs = $('#tabs');
+      tabs.innerHTML = '';
+      CATS.forEach(c=>{
+        const b = document.createElement('button');
+        b.className = 'pill' + (state.cat===c?' active':'');
+        b.textContent = c;
+        b.onclick = ()=>{ state.cat=c; render(); };
+        tabs.appendChild(b);
+      });
+    }
+
+    // ---------- Normalize ----------
+    function normalizeGame(g){
+      if(!g || !g.id || !g.title || !g.embedUrl) return null;
+      return {
+        id:String(g.id), title:String(g.title), description:g.description||'', category:g.category||'Other',
+        tags: Array.isArray(g.tags)? g.tags.map(String):[], thumb:g.thumb||'https://picsum.photos/seed/'+encodeURIComponent(g.id)+'/800/450',
+        embedUrl:String(g.embedUrl), rating: Number(g.rating||0), plays: Number(g.plays||0),
+        featured: !!g.featured, new: !!g.new, trending: !!g.trending
+      };
+    }
+
+    // ---------- Render Grid ----------
+    function render(){
+      renderTabs();
+      const grid = $('#grid');
+      const q = state.q.trim().toLowerCase();
+      const list = state.catalog
+        .filter(g=>!state.hidden.includes(g.id))
+        .filter(g=> state.cat==='All' ? true
+          : state.cat==='Favorites' ? state.favorites.includes(g.id)
+          : state.cat==='New' ? g.new
+          : state.cat==='Trending' ? g.trending
+          : state.cat==='Featured' ? g.featured
+          : g.category===state.cat)
+        .filter(g=> q ? (g.title+" "+g.description+" "+g.category+" "+(g.tags||[]).join(" ")).toLowerCase().includes(q) : true)
+        .sort((a,b)=> (b.featured===true)-(a.featured===true) || (b.trending===true)-(a.trending===true) || (b.new===true)-(a.new===true) || (b.rating||0)-(a.rating||0));
+
+      grid.innerHTML = '';
+      if(list.length===0){ grid.innerHTML = '<div class="empty">No games match. Try different filters.</div>'; return; }
+
+      list.forEach(g=> grid.appendChild(card(g)));
+    }
+
+    function card(g){
+      const tpl = $('#card-tpl');
+      const node = tpl.content.firstElementChild.cloneNode(true);
+      const thumb = $('.thumb', node);
+      thumb.style.backgroundImage = `url('${g.thumb}')`;
+      $('.title', node).textContent = g.title;
+      $('.cat', node).textContent = g.category||'Other';
+      $('.rating', node).textContent = g.rating ? g.rating.toFixed(1):'—';
+      $('.plays', node).textContent = fmt(g.plays||0);
+      $('.desc', node).textContent = g.description||'';
+
+      const tagRow = node.querySelector('.meta .row:last-of-type');
+      (g.tags||[]).slice(0,4).forEach(t=>{
+        const span = document.createElement('span'); span.className='chip'; span.textContent=t; tagRow.appendChild(span);
+      });
+
+      $('.fav', node).style.opacity = state.favorites.includes(g.id)? 1: .55;
+      $('.fav', node).onclick = ()=>{ toggleFav(g.id); $('.fav', node).style.opacity = state.favorites.includes(g.id)? 1: .55; };
+      $('.hide', node).onclick = ()=>{ state.hidden.push(g.id); save(); render(); };
+
+      $('.play', node).onclick = ()=> openPlayer(g);
+      $('.open', node).onclick = ()=> window.open(g.embedUrl, '_blank');
+      // Click anywhere on thumb to play
+      thumb.style.cursor='pointer'; thumb.onclick = ()=> openPlayer(g);
+
+      return node;
+    }
+
+    function toggleFav(id){
+      const i = state.favorites.indexOf(id);
+      if(i>-1) state.favorites.splice(i,1); else state.favorites.push(id);
+      save();
+    }
+
+    // ---------- Player Modal ----------
+    const modal = $('#modal');
+    $('#closeModal').onclick = ()=> modal.close();
+    function openPlayer(g){
+      $('#modalTitle').textContent = g.title;
+      $('#modalMeta').textContent = g.description || '';
+      $('#frame').src = g.embedUrl;
+      $('#openNew').onclick = ()=> window.open(g.embedUrl,'_blank');
+      modal.showModal();
+    }
+
+    // ---------- Search & Keyboard ----------
+    $('#q').addEventListener('input', e=>{ state.q = e.target.value; render(); });
+    window.addEventListener('keydown', e=>{ if(e.key === '/'){ e.preventDefault(); $('#q').focus(); } });
+
+    // ---------- Theme Toggle ----------
+    $('#themeBtn').onclick = ()=>{
+      state.theme = (state.theme === 'dark') ? 'light':'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      save();
+    };
+
+    // ---------- Import/Export ----------
+    $('#exportBtn').onclick = ()=>{
+      const blob = new Blob([JSON.stringify(state.catalog,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='game-catalog.json'; a.click(); URL.revokeObjectURL(url);
+    };
+    $('#importBtn').onclick = ()=> $('#file').click();
+    $('#file').addEventListener('change', (ev)=>{
+      const file = ev.target.files[0]; if(!file) return; const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const data = JSON.parse(reader.result);
+          if(!Array.isArray(data)) throw new Error('Catalog must be an array');
+          const cleaned = data.map(normalizeGame).filter(Boolean);
+          state.catalog = cleaned; save(); render();
+        }catch(err){ alert('Import failed: '+err.message); }
+      };
+      reader.readAsText(file);
+      ev.target.value = '';
+    });
+
+    // ---------- Add Game Dialog ----------
+    const addDialog = $('#addDialog');
+    $('#addBtn').onclick = ()=> addDialog.showModal();
+    $('#saveGame').onclick = (e)=>{
+      e.preventDefault();
+      const g = normalizeGame({
+        id: ($('#f-title').value||'untitled').toLowerCase().replace(/\s+/g,'-') + '-' + Math.random().toString(36).slice(2,6),
+        title: $('#f-title').value.trim(),
+        category: $('#f-cat').value.trim()||'Other',
+        tags: $('#f-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+        thumb: $('#f-thumb').value.trim(),
+        embedUrl: $('#f-embed').value.trim(),
+        rating: parseFloat($('#f-rating').value)||0,
+        plays: Math.floor(1000+Math.random()*100000),
+        new: true
+      });
+      if(!g) return alert('Missing required fields.');
+      state.catalog.unshift(g); save(); addDialog.close(); render();
+    };
+
+    // ---------- Boot ----------
+    $('#q').value = state.q;
+    render();
+  </script>
+</body>
+</html>
